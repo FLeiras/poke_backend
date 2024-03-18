@@ -9,6 +9,8 @@ router.get("/:id", pokemons.getPokemonById);
 
 router.post("/postPokemon", () => undefined);
 
-router.put("/deletePokemon/:id", () => undefined);
+router.put("/updatePokemon", () => undefined);
+
+router.delete("/deletePokemon/:id", () => undefined);
 
 export default router;
