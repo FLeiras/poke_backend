@@ -3,14 +3,14 @@ import * as pokemons from "./pokemons";
 
 const router = express.Router();
 
-router.get("/", pokemons.getPokemons);
+router.get("/pokemons", pokemons.getPokemons);
 
-router.get("/:id", pokemons.getPokemonById);
+router.get("/pokemon/:id", pokemons.getPokemonById);
 
-router.post("/postPokemon", () => undefined);
+router.post("/postPokemon", pokemons.createPokemon);
 
-router.put("/updatePokemon", () => undefined);
+router.put("/updatePokemon/:id", pokemons.updatePokemon);
 
-router.delete("/deletePokemon/:id", () => undefined);
+router.delete("/deletePokemon/:id", pokemons.deletePokemon);
 
 export default router;

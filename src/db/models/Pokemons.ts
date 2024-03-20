@@ -1,14 +1,23 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../sequelize";
-import { Type } from "./Types";
 
-class Pokemon extends Model {}
+import { Types } from "./Types";
+import { PokeTypes } from "../../interfaces/pokemon";
 
-export const Pokemons = Pokemon.init(
+class Pokemodel extends Model {
+  name!: string;
+  hp!: number;
+  attack!: number;
+  image!: string;
+  type!: PokeTypes;
+}
+
+export const Pokemons = Pokemodel.init(
   {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
+      unique: true,
       autoIncrement: true,
       allowNull: false,
     },
@@ -39,5 +48,5 @@ export const Pokemons = Pokemon.init(
   }
 );
 
-Pokemons.hasMany(Type, { foreignKey: "pokemon_type", sourceKey: "id" });
-Type.belongsTo(Pokemons, { foreignKey: "pokemon_type", targetKey: "id" });
+Pokemons.hasMany(Types, { foreignKey: "pokemon_type", sourceKey: "id" });
+Types.belongsTo(Pokemons, { foreignKey: "pokemon_type", targetKey: "id" });

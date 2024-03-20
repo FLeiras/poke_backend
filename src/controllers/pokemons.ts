@@ -2,13 +2,14 @@ import axios from "axios";
 import dotenv from "dotenv";
 
 import { Pokemons } from "../db/models/Pokemons";
-import { PokeTypes } from "../interfaces/Pokemon";
+import { PokeTypes, pokemonNotId } from "../interfaces/pokemon";
 import { pokeDataProperties } from "../helpers/pokeDataProperties";
+import { mapDbPokemonToPokemonType } from "../helpers/mapPokemonDbAtInterface";
 
 dotenv.config();
 const url = process.env.URL;
 
-export const savePokemonsInDb = async () => {
+const getPokemonsApi = async () => {
   const response = await axios.get(`${url}/?limit=100`);
   const pokeUrls = response.data.results.map((poke: any) => poke.url);
   const pokePromises = pokeUrls.map((url: any) => axios.get(url));
@@ -16,11 +17,10 @@ export const savePokemonsInDb = async () => {
 
   const pokemons = await Promise.all(
     pokeAll.map(async (pokeResponse) => {
-      const { pokeHp, pokeAttack, types, id, name, sprites } =
+      const { pokeHp, pokeAttack, types, name, sprites } =
         pokeDataProperties(pokeResponse);
 
       return {
-        id: id,
         name: name,
         hp: pokeHp,
         attack: pokeAttack,
@@ -30,19 +30,48 @@ export const savePokemonsInDb = async () => {
     })
   );
 
+  return pokemons;
+};
+
+const getPokemonFromDb = async () => {
   try {
-    await Pokemons.bulkCreate(pokemons);
-    console.log("Pokemons guardados en la base de datos");
+    const pokemons = await Pokemons.findAll();
+
+    return pokemons;
   } catch (error) {
-    console.error("Error al guardar los pokemons:", error);
+    console.error("Fail fetch:", error);
+    throw error;
   }
 };
 
 export const getAllPokemons = async () => {
-  await savePokemonsInDb();
-  const pokemons = await Pokemons.findAll();
+  try {
+    const pokemonsFromApi = await getPokemonsApi();
+    const pokemonsFromDb = await getPokemonFromDb();
 
-  return pokemons;
+    for (const pokemon of pokemonsFromApi) {
+      const existingPokemon = pokemonsFromDb.find(
+        (p) => p.name === pokemon.name
+      );
+      if (existingPokemon) {
+        existingPokemon.hp = pokemon.hp;
+        existingPokemon.attack = pokemon.attack;
+        existingPokemon.image = pokemon.image;
+        existingPokemon.type = pokemon.type;
+        await existingPokemon.save();
+      } else {
+        await Pokemons.create(pokemon);
+      }
+    }
+
+    console.log("Pokemons actualizados en la base de datos");
+
+    const allPokemons = await Pokemons.findAll();
+    return allPokemons;
+  } catch (error) {
+    console.error("Error al actualizar los pokemons:", error);
+    throw error;
+  }
 };
 
 export const getPokemonById = async (id: number) => {
@@ -52,5 +81,48 @@ export const getPokemonById = async (id: number) => {
   } catch (error) {
     console.error("Incorrect Pokémon ID:", error);
     throw error;
+  }
+};
+
+export const createPokemonInDb = async (data: pokemonNotId) => {
+  try {
+    const created = await Pokemons.create(data);
+
+    if (created) return true;
+  } catch (error) {
+    console.log("ACA CATCH", error);
+  }
+};
+
+export const updatePokemonFromDb = async (id: number, data: pokemonNotId) => {
+  try {
+    const pokemon = await Pokemons.findByPk(id);
+    if (pokemon !== null) {
+      pokemon.name = data.name;
+      pokemon.hp = data.hp;
+      pokemon.attack = data.attack;
+      pokemon.image = data.image;
+      pokemon.type = data.type;
+      await pokemon.save();
+    }
+
+    return true;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const deletePokemonFromDb = async (id: number) => {
+  try {
+    await Pokemons.destroy({
+      where: {
+        id,
+      },
+    });
+
+    return true;
+  } catch (error) {
+    console.error("Not delete Pokemon");
+    return false;
   }
 };

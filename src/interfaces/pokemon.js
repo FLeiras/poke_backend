@@ -1,0 +1,22 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.PokeTypes = void 0;
+var PokeTypes;
+(function (PokeTypes) {
+    PokeTypes["Fire"] = "fire";
+    PokeTypes["Water"] = "water";
+    PokeTypes["Grass"] = "grass";
+    PokeTypes["Poison"] = "poison";
+    PokeTypes["Normal"] = "normal";
+    PokeTypes["Flying"] = "flying";
+    PokeTypes["Bug"] = "bug";
+    PokeTypes["Electric"] = "electric";
+    PokeTypes["Ground"] = "ground";
+    PokeTypes["Fairy"] = "fairy";
+    PokeTypes["Fighting"] = "fighting";
+    PokeTypes["Psychic"] = "psychic";
+    PokeTypes["Rock"] = "rock";
+    PokeTypes["Steel"] = "steel";
+    PokeTypes["Ghost"] = "ghost";
+})(PokeTypes || (exports.PokeTypes = PokeTypes = {}));
+[];

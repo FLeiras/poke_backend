@@ -25,3 +25,5 @@ export interface Pokemon {
   attack: number;
   hp: number;
 }
+
+export type pokemonNotId = Omit<Pokemon, "id">;

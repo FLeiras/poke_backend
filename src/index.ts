@@ -1,9 +1,10 @@
 import express from "express";
 import dotenv from "dotenv";
-import pokeRoutes from "./routes";
 import { sequelize } from "./db/sequelize";
-import "./db/models/Pokemons";
+
 import "./db/models/Types";
+import "./db/models/Pokemons";
+import pokeRoutes from "./routes";
 
 const app = express();
 
@@ -16,7 +17,9 @@ app.get("/ping", (_req, res) => {
   res.send("pong");
 });
 
-app.use("/api/pokemons", pokeRoutes);
+app.use(express.json());
+
+app.use("/api", pokeRoutes);
 
 async function main() {
   try {

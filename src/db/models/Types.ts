@@ -1,14 +1,24 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../sequelize";
 
-export const Type = sequelize.define("types", {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
+class Type extends Model {}
+
+export const Types = Type.init(
+  {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      allowNull: false,
+      primaryKey: true,
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
   },
-  name: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-});
+  {
+    sequelize,
+    modelName: "types",
+  }
+);

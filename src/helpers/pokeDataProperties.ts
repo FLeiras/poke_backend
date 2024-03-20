@@ -1,7 +1,7 @@
-import { PokeTypes, Pokemon } from "../interfaces/Pokemon";
+import { PokeTypes, Pokemon } from "../interfaces/pokemon";
 
 export const pokeDataProperties = (pokeData: any) => {
-  const { id, name, sprites, stats } = pokeData.data;
+  const { name, sprites, stats } = pokeData.data;
 
   const types: PokeTypes = pokeData.data.types.map((t: any) => t.type.name);
 
@@ -19,7 +19,6 @@ export const pokeDataProperties = (pokeData: any) => {
     types,
     pokeAttack,
     pokeHp,
-    id,
     name,
     sprites,
   };
