@@ -12,9 +12,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deletePokemonFromDb = exports.updatePokemonFromDb = exports.createPokemonInDb = exports.getPokemonById = exports.getAllPokemons = void 0;
+exports.deletePokemonFromDb = exports.updatePokemonFromDb = exports.createPokemonInDb = exports.searchPokemonDbByName = exports.searchPokemonByName = exports.searchPokemonById = exports.getAllPokemons = void 0;
 const axios_1 = __importDefault(require("axios"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const sequelize_1 = require("sequelize");
 const Pokemons_1 = require("../db/models/Pokemons");
 const pokeDataProperties_1 = require("../helpers/pokeDataProperties");
 dotenv_1.default.config();
@@ -73,7 +74,7 @@ const getAllPokemons = () => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.getAllPokemons = getAllPokemons;
-const getPokemonById = (id) => __awaiter(void 0, void 0, void 0, function* () {
+const searchPokemonById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const pokemons = yield Pokemons_1.Pokemons.findByPk(id);
         return pokemons;
@@ -83,7 +84,44 @@ const getPokemonById = (id) => __awaiter(void 0, void 0, void 0, function* () {
         throw error;
     }
 });
-exports.getPokemonById = getPokemonById;
+exports.searchPokemonById = searchPokemonById;
+const searchPokemonByName = (name) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const searchPokemonsApi = yield axios_1.default.get(`${url}/?name=${name}`);
+        if (searchPokemonsApi) {
+            let p = searchPokemonsApi;
+            return {
+                id: p.data.id,
+                name: p.data.name,
+                image: p.data.sprites.front_default,
+                hp: p.data.stats[0].base_stat,
+                attack: p.data.stats[1].base_stat,
+                types: p.data.types.map((t) => {
+                    return { name: t.type.name };
+                }),
+            };
+        }
+        else {
+            return null;
+        }
+    }
+    catch (error) {
+        return { error: "Not found" };
+    }
+});
+exports.searchPokemonByName = searchPokemonByName;
+const searchPokemonDbByName = (name) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const searchPokemon = yield Pokemons_1.Pokemons.findOne({
+            where: sequelize_1.Sequelize.where(sequelize_1.Sequelize.fn("lower", sequelize_1.Sequelize.col("pokemons.name")), sequelize_1.Sequelize.fn("lower", name)),
+        });
+        return searchPokemon;
+    }
+    catch (error) {
+        return error;
+    }
+});
+exports.searchPokemonDbByName = searchPokemonDbByName;
 const createPokemonInDb = (data) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const created = yield Pokemons_1.Pokemons.create(data);

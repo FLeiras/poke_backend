@@ -1,10 +1,25 @@
 import { Request, Response } from "express";
 import * as pokemons from "../controllers/pokemons";
 
-export const getPokemons = async (_: Request, res: Response) => {
+export const getPokemons = async (req: Request, res: Response) => {
   try {
+    const { name } = req.query;
+    if (name) {
+      let pokemonSearch: any = await pokemons.searchPokemonByName(
+        name.toString()
+      );
+
+      if (pokemonSearch!.error) {
+        pokemonSearch = await pokemons.searchPokemonDbByName(name.toString());
+
+        if (!pokemonSearch) {
+          return res.status(404).json({ message: "Pokemon not found" });
+        }
+      }
+      return res.status(200).json(pokemonSearch);
+    }
+
     const allPokemons = await pokemons.getAllPokemons();
-    console.log(`RUTA: ${allPokemons}`);
     res.status(200).json(allPokemons);
   } catch (error) {
     console.log("Fail Fetch:", error);
@@ -15,13 +30,24 @@ export const getPokemons = async (_: Request, res: Response) => {
 export const getPokemonById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const pokeSelected = await pokemons.getPokemonById(Number(id));
+    const pokeSelected = await pokemons.searchPokemonById(Number(id));
     res.status(200).json(pokeSelected);
   } catch (error) {
     console.log("Fail Fetch ByID:", error);
     res.status(404).send("Incorrect Pokemon ID");
   }
 };
+
+// export const getPokemonByName = async (req: Request, res: Response) => {
+//   try {
+//     const { name } = req.params;
+//     const pokeSelected = await pokemons.searchPokemonByName(name);
+//     res.status(200).json(pokeSelected);
+//   } catch (error) {
+//     console.log("Fail Fetch ByID:", error);
+//     res.status(404).send("Pokémon does not exist");
+//   }
+// };
 
 export const createPokemon = async (req: Request, res: Response) => {
   try {

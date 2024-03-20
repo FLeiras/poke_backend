@@ -1,10 +1,10 @@
 import axios from "axios";
 import dotenv from "dotenv";
+import { Sequelize } from "sequelize";
 
 import { Pokemons } from "../db/models/Pokemons";
 import { PokeTypes, pokemonNotId } from "../interfaces/pokemon";
 import { pokeDataProperties } from "../helpers/pokeDataProperties";
-import { mapDbPokemonToPokemonType } from "../helpers/mapPokemonDbAtInterface";
 
 dotenv.config();
 const url = process.env.URL;
@@ -74,13 +74,52 @@ export const getAllPokemons = async () => {
   }
 };
 
-export const getPokemonById = async (id: number) => {
+export const searchPokemonById = async (id: number) => {
   try {
     const pokemons = await Pokemons.findByPk(id);
     return pokemons;
   } catch (error) {
     console.error("Incorrect Pokémon ID:", error);
     throw error;
+  }
+};
+
+export const searchPokemonByName = async (name: string) => {
+  try {
+    const searchPokemonsApi = await axios.get(`${url}/?name=${name}`);
+
+    if (searchPokemonsApi) {
+      let p = searchPokemonsApi;
+      return {
+        id: p.data.id,
+        name: p.data.name,
+        image: p.data.sprites.front_default,
+        hp: p.data.stats[0].base_stat,
+        attack: p.data.stats[1].base_stat,
+        types: p.data.types.map((t: any) => {
+          return { name: t.type.name };
+        }),
+      };
+    } else {
+      return null;
+    }
+  } catch (error) {
+    return { error: "Not found" };
+  }
+};
+
+export const searchPokemonDbByName = async (name: string) => {
+  try {
+    const searchPokemon = await Pokemons.findOne({
+      where: Sequelize.where(
+        Sequelize.fn("lower", Sequelize.col("pokemons.name")),
+        Sequelize.fn("lower", name)
+      ),
+    });
+
+    return searchPokemon;
+  } catch (error) {
+    return error;
   }
 };
 

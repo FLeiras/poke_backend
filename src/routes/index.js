@@ -30,6 +30,7 @@ const express_1 = __importDefault(require("express"));
 const pokemons = __importStar(require("./pokemons"));
 const router = express_1.default.Router();
 router.get("/pokemons", pokemons.getPokemons);
+// router.get("/pokemons/:name", pokemons.getPokemons);
 router.get("/pokemon/:id", pokemons.getPokemonById);
 router.post("/postPokemon", pokemons.createPokemon);
 router.put("/updatePokemon/:id", pokemons.updatePokemon);

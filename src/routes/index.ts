@@ -5,6 +5,8 @@ const router = express.Router();
 
 router.get("/pokemons", pokemons.getPokemons);
 
+// router.get("/pokemons/:name", pokemons.getPokemons);
+
 router.get("/pokemon/:id", pokemons.getPokemonById);
 
 router.post("/postPokemon", pokemons.createPokemon);

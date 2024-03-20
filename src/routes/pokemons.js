@@ -34,10 +34,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deletePokemon = exports.updatePokemon = exports.createPokemon = exports.getPokemonById = exports.getPokemons = void 0;
 const pokemons = __importStar(require("../controllers/pokemons"));
-const getPokemons = (_, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getPokemons = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const { name } = req.query;
+        if (name) {
+            let pokemonSearch = yield pokemons.searchPokemonByName(name.toString());
+            if (pokemonSearch.error) {
+                pokemonSearch = yield pokemons.searchPokemonDbByName(name.toString());
+                if (!pokemonSearch) {
+                    return res.status(404).json({ message: "Pokemon not found" });
+                }
+            }
+            return res.status(200).json(pokemonSearch);
+        }
         const allPokemons = yield pokemons.getAllPokemons();
-        console.log(`RUTA: ${allPokemons}`);
         res.status(200).json(allPokemons);
     }
     catch (error) {
@@ -49,7 +59,7 @@ exports.getPokemons = getPokemons;
 const getPokemonById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const pokeSelected = yield pokemons.getPokemonById(Number(id));
+        const pokeSelected = yield pokemons.searchPokemonById(Number(id));
         res.status(200).json(pokeSelected);
     }
     catch (error) {
@@ -58,6 +68,16 @@ const getPokemonById = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.getPokemonById = getPokemonById;
+// export const getPokemonByName = async (req: Request, res: Response) => {
+//   try {
+//     const { name } = req.params;
+//     const pokeSelected = await pokemons.searchPokemonByName(name);
+//     res.status(200).json(pokeSelected);
+//   } catch (error) {
+//     console.log("Fail Fetch ByID:", error);
+//     res.status(404).send("Pokémon does not exist");
+//   }
+// };
 const createPokemon = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { name, hp, attack, image, type } = req.body;
